@@ -1,0 +1,6 @@
+{
+  "name": "StreamFlix - Tienda de Cuentas y Streaming",
+  "description": "Tienda digital interactiva con las mejores suscripciones de streaming, películas, música, gaming e inteligencia artificial a precios accesibles y entrega inmediata.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

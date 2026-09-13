@@ -1,0 +1,5 @@
+allowBuilds:
+  '@tailwindcss/oxide': false
+  protobufjs: false
+  re2: false
+  unrs-resolver: false
