@@ -26,9 +26,33 @@ interface CheckoutModalProps {
   onClose: () => void;
   items: CartItem[];
   currency: CurrencyCode;
-  promoCode?: string;
-  discountPercent: number;
   onOrderCompleted: (order: PlacedOrder) => void;
+}
+
+function randomInt(min: number, max: number) {
+  return Math.floor(min + Math.random() * (max - min));
+}
+
+function generateOrderNumber() {
+  return `SF-${randomInt(100000, 900000)}`;
+}
+
+function generateCredentialId() {
+  return randomInt(1000, 9000);
+}
+
+function generatePassword() {
+  return randomInt(10000, 90000);
+}
+
+function formatCurrentDate() {
+  return new Date().toLocaleDateString('es-MX', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
 const PAYMENT_METHODS = [
@@ -75,8 +99,6 @@ export default function CheckoutModal({
   onClose,
   items,
   currency,
-  promoCode,
-  discountPercent,
   onOrderCompleted
 }: CheckoutModalProps) {
   const [customerName, setCustomerName] = useState('');
@@ -99,8 +121,7 @@ export default function CheckoutModal({
   if (!isOpen || items.length === 0) return null;
 
   const subtotalUSD = items.reduce((acc, item) => acc + item.unitPriceUSD * item.quantity, 0);
-  const discountUSD = (subtotalUSD * discountPercent) / 100;
-  const totalUSD = Math.max(0, subtotalUSD - discountUSD);
+  const totalUSD = subtotalUSD;
 
   const selectedMethod = PAYMENT_METHODS.find((m) => m.id === selectedMethodId) || PAYMENT_METHODS[0];
 
@@ -113,21 +134,21 @@ export default function CheckoutModal({
     setErrorValidation('');
     setIsProcessing(true);
 
-    const orderNumber = `SF-${Math.floor(100000 + Math.random() * 900000)}`;
+    const orderNumber = generateOrderNumber();
 
     // Prepare credentials structure for instant record
     const credentials: OrderCredential[] = [];
     items.forEach((item) => {
       for (let q = 0; q < item.quantity; q++) {
-        const randomId = Math.floor(1000 + Math.random() * 9000);
+        const randomId = generateCredentialId();
         const cleanServiceName = item.product.name.split(' ')[0].toLowerCase();
         
         credentials.push({
           service: item.product.name,
           type: item.accountType === 'profile' ? 'Perfil Privado con PIN' : 'Cuenta Completa Familiar',
           user: `acceso.${cleanServiceName}.${randomId}@hypertecgian.vip`,
-          pass: `HT_${cleanServiceName.toUpperCase()}_${Math.floor(10000 + Math.random() * 90000)}!`,
-          pin: item.accountType === 'profile' ? `${Math.floor(1000 + Math.random() * 9000)}` : undefined,
+          pass: `HT_${cleanServiceName.toUpperCase()}_${generatePassword()}!`,
+          pin: item.accountType === 'profile' ? `${generateCredentialId()}` : undefined,
           screens: item.product.screens,
           expiryDays: item.durationMonths * 30
         });
@@ -136,21 +157,13 @@ export default function CheckoutModal({
 
     const placedOrder: PlacedOrder = {
       orderId: orderNumber,
-      date: new Date().toLocaleDateString('es-MX', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      }),
+      date: formatCurrentDate(),
       customerName: customerName.trim(),
       customerContact: customerPhone.trim() || 'WhatsApp directo',
       paymentMethod: selectedMethod.label,
       items,
       currency,
       total: totalUSD,
-      discountApplied: discountUSD,
-      promoCode,
       credentials,
       status: 'completada'
     };
@@ -163,9 +176,7 @@ export default function CheckoutModal({
       paymentMethod: selectedMethod.label,
       items,
       currency,
-      totalUSD,
-      promoCode,
-      discountUSD
+      totalUSD
     });
 
     // 2. Open WhatsApp in new tab
@@ -363,13 +374,6 @@ export default function CheckoutModal({
                 <span>Subtotal:</span>
                 <span>{formatPrice(subtotalUSD, currency)}</span>
               </div>
-
-              {discountUSD > 0 && (
-                <div className="flex justify-between text-white font-semibold">
-                  <span>Descuento cupón {promoCode ? `(${promoCode})` : ''} ({discountPercent}%):</span>
-                  <span>-{formatPrice(discountUSD, currency)}</span>
-                </div>
-              )}
 
               <div className="flex justify-between text-sm font-black text-white pt-1.5 border-t border-zinc-800">
                 <span>Total a Pagar:</span>

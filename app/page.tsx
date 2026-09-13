@@ -50,8 +50,6 @@ export default function HomePage() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
   const [completedOrder, setCompletedOrder] = useState<PlacedOrder | null>(null);
-  const [activePromoCode, setActivePromoCode] = useState('');
-  const [activeDiscountPercent, setActiveDiscountPercent] = useState(0);
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -123,29 +121,6 @@ export default function HomePage() {
     setCartItems([]);
   };
 
-  const handleApplyPromoCode = (code: string): boolean => {
-    const clean = code.toUpperCase().trim();
-    if (clean === 'HYPER15') {
-      setActivePromoCode('HYPER15');
-      setActiveDiscountPercent(15);
-      showToast('Cupón HYPER15 aplicado: 15% de descuento extra');
-      return true;
-    }
-    if (clean === 'BLACK20' || clean === 'NEON2025') {
-      setActivePromoCode('BLACK20');
-      setActiveDiscountPercent(20);
-      showToast('Cupón BLACK20 aplicado: 20% de descuento especial');
-      return true;
-    }
-    if (clean === 'PROMO10' || clean === 'BIENVENIDO') {
-      setActivePromoCode(clean);
-      setActiveDiscountPercent(10);
-      showToast('Cupón aplicado: 10% de descuento');
-      return true;
-    }
-    return false;
-  };
-
   const handleBuyNow = (
     product: StreamingProduct,
     durationMonths: PlanDuration = 1,
@@ -167,7 +142,7 @@ export default function HomePage() {
     setIsCheckoutOpen(true);
   };
 
-  const handleStartCartCheckout = (promoCode: string, discountPercent: number) => {
+  const handleStartCartCheckout = () => {
     if (cartItems.length === 0) return;
     setCheckoutItems(cartItems);
     setIsCartOpen(false);
@@ -367,8 +342,6 @@ export default function HomePage() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         onClearCart={handleClearCart}
-        activePromoCode={activePromoCode}
-        onApplyPromoCode={handleApplyPromoCode}
         onCheckout={handleStartCartCheckout}
       />
 
@@ -377,8 +350,6 @@ export default function HomePage() {
         onClose={() => setIsCheckoutOpen(false)}
         items={checkoutItems}
         currency={currency}
-        promoCode={activePromoCode}
-        discountPercent={activeDiscountPercent}
         onOrderCompleted={handleOrderCompleted}
       />
 

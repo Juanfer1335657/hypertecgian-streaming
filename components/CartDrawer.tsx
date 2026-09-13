@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { CartItem, CurrencyCode } from '@/types';
 import { formatPrice } from '@/data/currencies';
 import { buildCartWhatsAppUrl, openWhatsAppUrl } from '@/lib/whatsapp';
@@ -10,7 +10,6 @@ import {
   Plus, 
   Minus, 
   ShoppingBag, 
-  Tag, 
   MessageCircle, 
   ShieldCheck
 } from 'lucide-react';
@@ -24,9 +23,7 @@ interface CartDrawerProps {
   onUpdateQuantity: (cartItemId: string, delta: number) => void;
   onRemoveItem: (cartItemId: string) => void;
   onClearCart: () => void;
-  activePromoCode: string;
-  onApplyPromoCode: (code: string) => boolean;
-  onCheckout?: (promoCode: string, discountPercent: number) => void;
+  onCheckout?: () => void;
 }
 
 export default function CartDrawer({
@@ -37,15 +34,8 @@ export default function CartDrawer({
   onUpdateQuantity,
   onRemoveItem,
   onClearCart,
-  activePromoCode,
-  onApplyPromoCode,
   onCheckout
 }: CartDrawerProps) {
-  const [promoInput, setPromoInput] = useState(activePromoCode || '');
-  const [promoMessage, setPromoMessage] = useState<{ text: string; isError: boolean } | null>(
-    activePromoCode ? { text: `Cupón ${activePromoCode} activo`, isError: false } : null
-  );
-
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -61,38 +51,16 @@ export default function CartDrawer({
 
   // Calculate subtotal
   const subtotalUSD = items.reduce((acc, item) => acc + item.unitPriceUSD * item.quantity, 0);
-
-  // Discount
-  let discountPercent = 0;
-  if (activePromoCode.toUpperCase() === 'HYPER15') discountPercent = 15;
-  if (activePromoCode.toUpperCase() === 'NEON2025' || activePromoCode.toUpperCase() === 'BLACK20') discountPercent = 20;
-  if (activePromoCode.toUpperCase() === 'PROMO10' || activePromoCode.toUpperCase() === 'BIENVENIDO') discountPercent = 10;
-
-  const discountAmountUSD = (subtotalUSD * discountPercent) / 100;
-  const finalTotalUSD = Math.max(0, subtotalUSD - discountAmountUSD);
-
-  const handleApplyCoupon = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!promoInput.trim()) return;
-    const ok = onApplyPromoCode(promoInput.trim().toUpperCase());
-    if (ok) {
-      setPromoMessage({ text: `Cupón ${promoInput.toUpperCase()} aplicado con éxito`, isError: false });
-    } else {
-      setPromoMessage({ text: 'Cupón no válido. Prueba HYPER15 o BLACK20', isError: true });
-    }
-  };
+  const finalTotalUSD = Math.max(0, subtotalUSD);
 
   const handleWhatsAppCheckout = () => {
     if (onCheckout) {
-      onCheckout(activePromoCode, discountPercent);
+      onCheckout();
       return;
     }
     const url = buildCartWhatsAppUrl({
       items,
       currency,
-      activePromoCode: activePromoCode || undefined,
-      discountPercent: discountPercent > 0 ? discountPercent : undefined,
-      discountAmountUSD: discountAmountUSD > 0 ? discountAmountUSD : undefined,
       finalTotalUSD
     });
     openWhatsAppUrl(url);
@@ -231,47 +199,12 @@ export default function CartDrawer({
           {items.length > 0 && (
             <div className="p-4 sm:p-5 border-t border-zinc-800 bg-zinc-900 space-y-3.5">
               
-              {/* Promo Code Form */}
-              <form onSubmit={handleApplyCoupon} className="space-y-1.5">
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-                    <input
-                      type="text"
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      placeholder="Código de cupón (HYPER15)"
-                      className="w-full pl-9 pr-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white uppercase placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="px-3.5 py-2 bg-zinc-800 hover:bg-zinc-700 text-xs font-bold rounded-xl text-zinc-200 hover:text-white transition-colors cursor-pointer border border-zinc-700"
-                  >
-                    Aplicar
-                  </button>
-                </div>
-
-                {promoMessage && (
-                  <p className={`text-[11px] font-semibold ${promoMessage.isError ? 'text-zinc-400 underline' : 'text-zinc-300'}`}>
-                    {promoMessage.text}
-                  </p>
-                )}
-              </form>
-
               {/* Price Calculations */}
               <div className="space-y-1 text-xs text-zinc-400 pt-1">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span className="text-zinc-200 font-semibold">{formatPrice(subtotalUSD, currency)}</span>
                 </div>
-
-                {discountPercent > 0 && (
-                  <div className="flex justify-between text-white font-semibold">
-                    <span>Descuento cupón ({discountPercent}%):</span>
-                    <span>-{formatPrice(discountAmountUSD, currency)}</span>
-                  </div>
-                )}
 
                 <div className="flex justify-between text-base font-black text-white pt-2 border-t border-zinc-800">
                   <span>Total a Pagar:</span>

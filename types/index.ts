@@ -101,8 +101,6 @@ export interface PlacedOrder {
   items: CartItem[];
   currency: CurrencyCode;
   total: number;
-  discountApplied: number;
-  promoCode?: string;
   credentials: OrderCredential[];
   status: 'completada' | 'procesando';
 }

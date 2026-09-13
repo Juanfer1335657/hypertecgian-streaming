@@ -92,9 +92,7 @@ export default function OrderSuccessModal({
       paymentMethod: order.paymentMethod,
       items: order.items,
       currency: order.currency,
-      totalUSD: order.total,
-      promoCode: order.promoCode,
-      discountUSD: order.discountApplied
+      totalUSD: order.total
     });
     openWhatsAppUrl(url);
   };

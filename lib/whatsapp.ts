@@ -22,24 +22,15 @@ export function buildSingleProductWhatsAppUrl(params: {
   accountType: 'profile' | 'full';
   totalPriceUSD: number;
   currency: CurrencyCode;
-  promoCode?: string;
-  discountPercent?: number;
 }): string {
-  const { product, durationMonths, accountType, totalPriceUSD, currency, promoCode, discountPercent } = params;
+  const { product, durationMonths, accountType, totalPriceUSD, currency } = params;
 
   let message = `¡Hola Hypertecgian! 👋\nQuiero comprar el siguiente servicio de streaming:\n\n`;
   message += `📺 *Servicio:* ${product.name}\n`;
   message += `⏳ *Duración:* ${durationMonths} ${durationMonths === 1 ? 'mes' : 'meses'}\n`;
   message += `🔐 *Modalidad:* ${accountType === 'profile' ? 'Perfil Privado con PIN' : 'Cuenta Completa'}\n`;
   message += `🛡️ *Garantía:* Reposición activa por ${durationMonths * 30} días\n`;
-
-  if (promoCode && discountPercent && discountPercent > 0) {
-    const discountedTotal = totalPriceUSD * (1 - discountPercent / 100);
-    message += `🎟️ *Cupón aplicado:* ${promoCode} (-${discountPercent}% OFF)\n`;
-    message += `💰 *Total a pagar:* ${formatPrice(discountedTotal, currency)}\n\n`;
-  } else {
-    message += `💰 *Total a pagar:* ${formatPrice(totalPriceUSD, currency)}\n\n`;
-  }
+  message += `💰 *Total a pagar:* ${formatPrice(totalPriceUSD, currency)}\n\n`;
 
   message += `¿Cuáles son los datos para realizar el pago (SPEI, OXXO, Tarjeta, Nequi, PayPal o USDT) y recibir el acceso de inmediato?`;
 
@@ -51,12 +42,9 @@ export function buildSingleProductWhatsAppUrl(params: {
 export function buildCartWhatsAppUrl(params: {
   items: CartItem[];
   currency: CurrencyCode;
-  activePromoCode?: string;
-  discountPercent?: number;
-  discountAmountUSD?: number;
   finalTotalUSD: number;
 }): string {
-  const { items, currency, activePromoCode, discountPercent, discountAmountUSD, finalTotalUSD } = params;
+  const { items, currency, finalTotalUSD } = params;
 
   const orderNum = Math.floor(100000 + Math.random() * 900000);
   let message = `¡Hola Hypertecgian! 👋\nQuiero procesar mi pedido de suscripciones:\n\n`;
@@ -72,12 +60,6 @@ export function buildCartWhatsAppUrl(params: {
   });
 
   message += `──────────────────────\n`;
-
-  if (activePromoCode && discountPercent && discountPercent > 0 && discountAmountUSD) {
-    message += `🎟️ *Cupón:* ${activePromoCode} (-${discountPercent}% OFF)\n`;
-    message += `📉 *Descuento:* -${formatPrice(discountAmountUSD, currency)}\n`;
-  }
-
   message += `💰 *Total a pagar:* ${formatPrice(finalTotalUSD, currency)}\n`;
   message += `🛡️ *Garantía:* Cuentas garantizadas durante todo el periodo\n\n`;
   message += `¿Cuáles son los datos de transferencia o pago disponibles para completar la compra y recibir los accesos?`;
@@ -95,8 +77,6 @@ export function buildOrderWhatsAppUrl(params: {
   items: CartItem[];
   currency: CurrencyCode;
   totalUSD: number;
-  promoCode?: string;
-  discountUSD?: number;
 }): string {
   const { 
     orderId, 
@@ -105,9 +85,7 @@ export function buildOrderWhatsAppUrl(params: {
     paymentMethod, 
     items, 
     currency, 
-    totalUSD, 
-    promoCode, 
-    discountUSD 
+    totalUSD
   } = params;
 
   let message = `¡Hola Hypertecgian! 👋 Acabo de generar un pedido en la tienda web:\n\n`;
@@ -128,10 +106,6 @@ export function buildOrderWhatsAppUrl(params: {
   });
 
   message += `──────────────────────\n`;
-  if (promoCode && discountUSD && discountUSD > 0) {
-    message += `🎟️ *Cupón:* ${promoCode}\n`;
-    message += `📉 *Descuento:* -${formatPrice(discountUSD, currency)}\n`;
-  }
   message += `💰 *TOTAL A PAGAR:* ${formatPrice(totalUSD, currency)}\n`;
   message += `──────────────────────\n\n`;
   message += `🛡️ *Garantía:* Cuentas garantizadas durante todo el periodo.\n`;
