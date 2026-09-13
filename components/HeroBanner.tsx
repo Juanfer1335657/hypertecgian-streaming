@@ -31,19 +31,6 @@ export default function HeroBanner({
 
       <div className="relative max-w-7xl mx-auto">
         
-        {/* Top Floating Badge */}
-        <div className="flex justify-center mb-6">
-          <div
-            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 backdrop-blur-md cursor-pointer transition-colors animate-fade-down"
-            onClick={() => onSelectCategory('combos')}
-          >
-            <span className="w-2 h-2 rounded-full bg-white" />
-            <span className="text-xs font-semibold text-zinc-200 tracking-wide">
-              Tarifas Especiales de Temporada · Hasta 70% Menos que el Precio Oficial
-            </span>
-          </div>
-        </div>
-
         {/* Main Title & Value Proposition */}
         <div className="text-center max-w-4xl mx-auto space-y-4">
           <h1
